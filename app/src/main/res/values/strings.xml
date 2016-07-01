@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">WP</string>
     <string name="play">ИГРАТЬ</string>
+    <string name="exit">ВЫХОД</string>
 </resources>
