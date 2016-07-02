@@ -29,10 +29,10 @@ public class MenuCategory extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.rv);
+        setContentView(R.layout.lay_category);
 
         rv = (RecyclerView) findViewById(R.id.rv);
-        rv.setLayoutManager(new LinearLayoutManager(this));
+        rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rv.setItemAnimator(new DefaultItemAnimator());
 
         adapter = new RVAcategory(category);
@@ -64,7 +64,7 @@ public class MenuCategory extends AppCompatActivity {
 
                 int i = 0;
                 for (Element now : name) {
-                    category.add(new Category(name.get(i).text(), link.get(i).text()));
+                    category.add(new Category(name.get(i).text(), link.get(i).text(), "zip"));
                     i++;
                 }
 

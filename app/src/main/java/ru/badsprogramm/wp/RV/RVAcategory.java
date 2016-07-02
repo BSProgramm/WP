@@ -2,10 +2,12 @@ package ru.badsprogramm.wp.RV;
 
 
 import android.content.Intent;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -24,12 +26,16 @@ public class RVAcategory extends RecyclerView.Adapter<RVAcategory.ViewHolder> {
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-        TextView tv;
+        CardView cardView;
+        TextView name;
+        ImageView png;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            tv = (TextView) itemView.findViewById(R.id.text);
-            tv.setOnClickListener(this);
+            cardView = (CardView) itemView.findViewById(R.id.card);
+            name = (TextView) itemView.findViewById(R.id.text);
+            png = (ImageView) itemView.findViewById(R.id.png);
+            cardView.setOnClickListener(this);
         }
 
         @Override
@@ -48,7 +54,7 @@ public class RVAcategory extends RecyclerView.Adapter<RVAcategory.ViewHolder> {
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.tv.setText(category.get(position).getName());
+        holder.name.setText(category.get(position).getName());
     }
 
     @Override

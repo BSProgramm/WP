@@ -16,14 +16,13 @@ public class MainActivity extends AppCompatActivity {
         CardView btnPlay = (CardView) findViewById(R.id.play);
         CardView btnExit = (CardView) findViewById(R.id.exit);
 
-        if (btnPlay != null) {
-            btnPlay.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startActivity(new Intent(MainActivity.this,MenuCategory.class));
-                }
-            });
-        }
+        assert btnPlay != null;
+        btnPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this,MenuCategory.class));
+            }
+        });
 
         if (btnExit != null) {
             btnExit.setOnClickListener(new View.OnClickListener() {
