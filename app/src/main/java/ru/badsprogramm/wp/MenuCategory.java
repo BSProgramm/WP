@@ -5,8 +5,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -24,7 +24,7 @@ public class MenuCategory extends AppCompatActivity {
     RecyclerView rv;
     RVAcategory adapter;
     List<Category> category = new ArrayList<>();
-    Elements name, link;
+    Elements name, link, png;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,10 +32,12 @@ public class MenuCategory extends AppCompatActivity {
         setContentView(R.layout.lay_category);
 
         rv = (RecyclerView) findViewById(R.id.rv);
-        rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        rv.setItemAnimator(new DefaultItemAnimator());
+        rv.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
+        RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
+        itemAnimator.setAddDuration(700);
+        rv.setItemAnimator(itemAnimator);
 
-        adapter = new RVAcategory(category);
+        adapter = new RVAcategory(category, getApplicationContext());
 
         new Connect().execute();
     }
@@ -49,7 +51,7 @@ public class MenuCategory extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             if(!b){dialog.setMessage("Загрузка...");dialog.show();dialog.setCancelable(false);}
-            b=true;
+            b = true;
         }
 
         protected String doInBackground(String... arg) {
@@ -61,10 +63,11 @@ public class MenuCategory extends AppCompatActivity {
 
                 name = doc.select("div#category");
                 link = doc.select("div#link");
+                png = doc.select("div#png");
 
                 int i = 0;
                 for (Element now : name) {
-                    category.add(new Category(name.get(i).text(), link.get(i).text(), "zip"));
+                    category.add(new Category(name.get(i).text(), link.get(i).text(), png.get(i).text()));
                     i++;
                 }
 
