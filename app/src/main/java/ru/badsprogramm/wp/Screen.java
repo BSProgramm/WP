@@ -6,6 +6,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -39,9 +41,10 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
     List<Card> cards = new ArrayList<>();
     ImageLoader imageLoader;
     DisplayImageOptions options;
-    TextView tv,stats,tv2,stats2;
+    TextView tv,stats,tv2,stats2, score;
     RelativeLayout min, max;
     ImageView img,img2;
+    Animation animation;
     int[] numbers;
     int i = 0;
 
@@ -60,6 +63,9 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
         stats2 = (TextView) findViewById(R.id.stats2);
         img = (ImageView) findViewById(R.id.img);
         img2 = (ImageView) findViewById(R.id.img2);
+        score = (TextView) findViewById(R.id.score);
+        animation = AnimationUtils.loadAnimation(this, R.anim.bounce_scrore);
+
         min.setOnClickListener(this);
         max.setOnClickListener(this);
 
@@ -73,12 +79,16 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
             case R.id.min:
                 if(Integer.parseInt(cards.get(numbers[i]).getStats()) > Integer.parseInt(cards.get(numbers[i+1]).getStats())){
                     i++;
+                    score.setText(String.valueOf(i));
+                    score.startAnimation(animation);
                 }
                 else min.setEnabled(false);
             break;
             case R.id.max:
                 if(Integer.parseInt(cards.get(numbers[i]).getStats()) < Integer.parseInt(cards.get(numbers[i+1]).getStats())){
                     i++;
+                    score.setText(String.valueOf(i));
+                    score.startAnimation(animation);
                 }
                 else max.setEnabled(false);
             break;
