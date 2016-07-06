@@ -47,7 +47,7 @@ public class RVAcategory extends RecyclerView.Adapter<RVAcategory.ViewHolder> {
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        TextView name;
+        TextView name, descrip;
         ImageView png;
 
         public ViewHolder(View itemView) {
@@ -55,6 +55,7 @@ public class RVAcategory extends RecyclerView.Adapter<RVAcategory.ViewHolder> {
             cardView = (CardView) itemView.findViewById(R.id.card);
             name = (TextView) itemView.findViewById(R.id.text);
             png = (ImageView) itemView.findViewById(R.id.png);
+            descrip = (TextView) itemView.findViewById(R.id.descrip);
 
             UIL();
 
@@ -78,6 +79,7 @@ public class RVAcategory extends RecyclerView.Adapter<RVAcategory.ViewHolder> {
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.name.setText(category.get(position).getName());
+        holder.descrip.setText(category.get(position).getDescrip());
         imageLoader.displayImage(category.get(position).getPng(), holder.png, options);
         animate(holder);
     }

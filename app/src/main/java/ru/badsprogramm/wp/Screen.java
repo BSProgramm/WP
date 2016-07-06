@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiskCache;
@@ -38,7 +39,8 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
     List<Card> cards = new ArrayList<>();
     ImageLoader imageLoader;
     DisplayImageOptions options;
-    TextView tv,stats,tv2,stats2,min,max;
+    TextView tv,stats,tv2,stats2;
+    RelativeLayout min, max;
     ImageView img,img2;
     int[] numbers;
     int i = 0;
@@ -46,14 +48,14 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.screen_layout);
+        setContentView(R.layout.lay_screen);
 
         link = getIntent().getStringExtra("LINK");
 
         tv = (TextView) findViewById(R.id.text);
         tv2 = (TextView) findViewById(R.id.text2);
-        min = (TextView) findViewById(R.id.min);
-        max = (TextView) findViewById(R.id.max);
+        min = (RelativeLayout) findViewById(R.id.min);
+        max = (RelativeLayout) findViewById(R.id.max);
         stats = (TextView) findViewById(R.id.stats);
         stats2 = (TextView) findViewById(R.id.stats2);
         img = (ImageView) findViewById(R.id.img);
@@ -71,16 +73,14 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
             case R.id.min:
                 if(Integer.parseInt(cards.get(numbers[i]).getStats()) > Integer.parseInt(cards.get(numbers[i+1]).getStats())){
                     i++;
-                    max.setText("max");
                 }
-                else min.setText("------------");
+                else min.setEnabled(false);
             break;
             case R.id.max:
                 if(Integer.parseInt(cards.get(numbers[i]).getStats()) < Integer.parseInt(cards.get(numbers[i+1]).getStats())){
                     i++;
-                    min.setText("min");
                 }
-                else max.setText("------------");
+                else max.setEnabled(false);
             break;
         }
         if (i < numbers.length - 1) setCards(i);
