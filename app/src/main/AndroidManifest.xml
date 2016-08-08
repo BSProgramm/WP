@@ -21,8 +21,6 @@
 
         <activity android:name=".Screen" >
         </activity>
-        <activity android:name=".MenuCategory" >
-        </activity>
 
     </application>
 </manifest>

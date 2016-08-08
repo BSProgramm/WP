@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
         btnPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this,MenuCategory.class));
+                startActivity(new Intent(MainActivity.this, Screen.class));
             }
         });
 

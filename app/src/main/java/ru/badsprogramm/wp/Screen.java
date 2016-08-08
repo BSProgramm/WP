@@ -36,7 +36,6 @@ import java.util.Random;
 
 public class Screen extends AppCompatActivity implements View.OnClickListener{
 
-    String link;
     Elements obj;
     List<Card> cards = new ArrayList<>();
     ImageLoader imageLoader;
@@ -52,8 +51,6 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.lay_screen);
-
-        link = getIntent().getStringExtra("LINK");
 
         tv = (TextView) findViewById(R.id.text);
         tv2 = (TextView) findViewById(R.id.text2);
@@ -77,7 +74,7 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.min:
-                if(Integer.parseInt(cards.get(numbers[i]).getStats()) > Integer.parseInt(cards.get(numbers[i+1]).getStats())){
+                if(Integer.parseInt(cards.get(numbers[i]).getStats().replaceAll(" ", "")) > Integer.parseInt(cards.get(numbers[i+1]).getStats().replaceAll(" ",""))){
                     i++;
                     score.setText(String.valueOf(i));
                     score.startAnimation(animation);
@@ -85,7 +82,7 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
                 else min.setEnabled(false);
             break;
             case R.id.max:
-                if(Integer.parseInt(cards.get(numbers[i]).getStats()) < Integer.parseInt(cards.get(numbers[i+1]).getStats())){
+                if(Integer.parseInt(cards.get(numbers[i]).getStats().replaceAll(" ", "")) < Integer.parseInt(cards.get(numbers[i+1]).getStats().replaceAll(" ",""))){
                     i++;
                     score.setText(String.valueOf(i));
                     score.startAnimation(animation);
@@ -102,6 +99,7 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
         ProgressDialog dialog = new ProgressDialog(Screen.this);
         private boolean exception = false;
         boolean b;
+        String stats = "";
         int count = 0;
 
         @Override
@@ -114,13 +112,22 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
             Document doc;
 
             try {
-                doc = Jsoup.connect(link)
+                doc = Jsoup.connect("http://kumdang.ru/wp1.html")
                         .get();
 
                 obj = doc.select("div#object");
 
                 for(Element now : obj){
-                    cards.add(new Card(obj.get(count).text().split(" ")[0], obj.get(count).text().split(" ")[1], obj.get(count).text().split(" ")[2]));
+                    if (now.text().split(" ")[2].contains("youtube")){
+                        doc = Jsoup.connect(now.text().split(" ")[2])
+                                .userAgent("Chrome/32.0.1667.0")
+                                .get();
+                        stats = doc.select("div.primary-header-actions>span>span").get(0).text();
+                    }
+                    else {
+                        stats = now.text().split(" ")[2];
+                    }
+                    cards.add(new Card(obj.get(count).text().split(" ")[0], obj.get(count).text().split(" ")[1], stats));
                     count++;
                 }
 

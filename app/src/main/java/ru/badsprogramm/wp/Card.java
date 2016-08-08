@@ -7,7 +7,7 @@ public class Card {
 
     public Card(String name, String img, String stats) {
         if(name.contains("_")){
-            this.name = name.replace("_", " ");
+            this.name = name.replaceAll("_", " ");
         }
         else this.name = name;
         this.img = img;
