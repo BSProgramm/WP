@@ -47,6 +47,9 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
     Animation animation;
     int[] numbers;
     int i = 0;
+    int parse = 0;
+    LoadSub load;
+    ProgressDialog status;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,31 +71,48 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
         max.setOnClickListener(this);
 
         UIL();
+        load = new LoadSub();
+        status = new ProgressDialog(Screen.this);
+        status.setMessage("Загрузка...");
+        status.setCancelable(false);
         new Connect().execute();
     }
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.min:
-                if(Integer.parseInt(cards.get(numbers[i]).getStats().replaceAll(" ", "")) > Integer.parseInt(cards.get(numbers[i+1]).getStats().replaceAll(" ",""))){
-                    i++;
-                    score.setText(String.valueOf(i));
-                    score.startAnimation(animation);
-                    max.setEnabled(true);
-                }
-                else min.setEnabled(false);
-            break;
-            case R.id.max:
-                if(Integer.parseInt(cards.get(numbers[i]).getStats().replaceAll(" ", "")) < Integer.parseInt(cards.get(numbers[i+1]).getStats().replaceAll(" ",""))){
-                    i++;
-                    score.setText(String.valueOf(i));
-                    score.startAnimation(animation);
-                    min.setEnabled(true);
-                }
-                else max.setEnabled(false);
-            break;
+        try{
+            switch (v.getId()){
+                case R.id.min:
+                    if(Integer.parseInt(cards.get(numbers[i]).getStats().replaceAll(" ", "")) > Integer.parseInt(cards.get(numbers[i+1]).getStats().replaceAll(" ",""))){
+                        i++;
+                        score.setText(String.valueOf(i));
+                        score.startAnimation(animation);
+                        max.setEnabled(true);
+                    }
+                    else min.setEnabled(false);
+                    break;
+                case R.id.max:
+                    if(Integer.parseInt(cards.get(numbers[i]).getStats().replaceAll(" ", "")) < Integer.parseInt(cards.get(numbers[i+1]).getStats().replaceAll(" ",""))){
+                        i++;
+                        score.setText(String.valueOf(i));
+                        score.startAnimation(animation);
+                        min.setEnabled(true);
+                    }
+                    else max.setEnabled(false);
+                    break;
+            }
         }
+        catch (NumberFormatException nfe){
+            //Toast.makeText(getBaseContext(), "Integer ne sparsilsya", Toast.LENGTH_SHORT).show();
+            status.show();
+        }
+
+        if (load.getStatus() != AsyncTask.Status.RUNNING){
+            load = null;
+            load = new LoadSub();
+            load.execute();
+        }
+
         if (i < numbers.length - 1) setCards(i);
         else super.onBackPressed();
     }
@@ -102,7 +122,6 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
         ProgressDialog dialog = new ProgressDialog(Screen.this);
         private boolean exception = false;
         boolean b;
-        String stats = "";
         int count = 0;
 
         @Override
@@ -121,18 +140,30 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
                 obj = doc.select("div#object");
 
                 for(Element now : obj){
-                    if (now.text().split(" ")[2].contains("youtube")){
-                        doc = Jsoup.connect(now.text().split(" ")[2])
-                                .userAgent("Chrome/32.0.1667.0")
-                                .get();
-                        stats = doc.select("div.primary-header-actions>span>span").get(0).text();
-                    }
-                    else {
-                        stats = now.text().split(" ")[2];
-                    }
-                    cards.add(new Card(obj.get(count).text().split(" ")[0], obj.get(count).text().split(" ")[1], stats));
+                    cards.add(new Card(obj.get(count).text().split(" ")[0], obj.get(count).text().split(" ")[1], now.text().split(" ")[2]));
                     count++;
                 }
+
+                //Random
+                numbers = new int[count];
+                for (int i = 0; i < count; i++){
+                    int k = new Random().nextInt(count);
+                    while (numbers[k] != 0){
+                        k = new Random().nextInt(count);
+                    }
+                    numbers[k] = i;
+                }
+
+                for (int i = parse; i < parse + 6; i++){
+                    if (cards.get(numbers[i]).getStats().contains("youtube")){
+                        doc = Jsoup.connect(cards.get(numbers[i]).getStats())
+                                .userAgent("Chrome/32.0.1667.0")
+                                .get();
+                        cards.get(numbers[i]).setStats(doc.select("div.primary-header-actions>span>span").get(0).text());
+                    }
+                }
+
+                parse = 6;
 
             } catch (IOException e) {
                 exception = true;
@@ -144,22 +175,64 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
         @Override
         protected void onPostExecute(String result) {
             if (exception){
-                Toast.makeText(getBaseContext(), "Bratan, tut oshibka", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getBaseContext(), "Bratan, tut oshibka", Toast.LENGTH_SHORT).show();
             }
             else {
-                numbers = new int[count];
-                for (int i = 0; i < count; i++){
-                    int k = new Random().nextInt(count);
-                    while (numbers[k] != 0){
-                        k = new Random().nextInt(count);
-                    }
-                    numbers[k] = i;
-                }
                 setCards(0);
             }
             dialog.dismiss();
         }
 
+    }
+
+    public class LoadSub extends AsyncTask<String, Void, String>{
+
+        boolean exception = false;
+        boolean ie = false;
+
+        @Override
+        protected void onPreExecute() {
+            if (i >= parse - 2) status.show();
+        }
+
+        protected String doInBackground(String... arg) {
+            Document doc;
+
+            try {
+                for (int i = parse; i < parse + 4; i++){
+                    if (cards.get(numbers[i]).getStats().contains("youtube")){
+                        doc = Jsoup.connect(cards.get(numbers[i]).getStats())
+                                .userAgent("Chrome/32.0.1667.0")
+                                .get();
+                        cards.get(numbers[i]).setStats(doc.select("div.primary-header-actions>span>span").get(0).text());
+                    }
+                }
+                parse = parse + 4;
+            }
+            catch (IndexOutOfBoundsException i){
+                ie = true;
+            }
+            catch (Exception e){
+                exception = true;
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            status.dismiss();
+            if (exception){
+                //Toast.makeText(getBaseContext(), "Ne zagruzil", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                if (ie){
+                    //Toast.makeText(getBaseContext(), "Vse Zagruzil", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    //Toast.makeText(getBaseContext(), "Zagruzil", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
 
     private void setCards(int i){
