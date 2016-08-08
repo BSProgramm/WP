@@ -11,6 +11,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiskCache;
 import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
@@ -78,6 +79,7 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
                     i++;
                     score.setText(String.valueOf(i));
                     score.startAnimation(animation);
+                    max.setEnabled(true);
                 }
                 else min.setEnabled(false);
             break;
@@ -86,6 +88,7 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
                     i++;
                     score.setText(String.valueOf(i));
                     score.startAnimation(animation);
+                    min.setEnabled(true);
                 }
                 else max.setEnabled(false);
             break;
@@ -112,7 +115,7 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
             Document doc;
 
             try {
-                doc = Jsoup.connect("http://kumdang.ru/wp1.html")
+                doc = Jsoup.connect("http://kumdang.ru/wp.html")
                         .get();
 
                 obj = doc.select("div#object");
@@ -141,7 +144,7 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
         @Override
         protected void onPostExecute(String result) {
             if (exception){
-
+                Toast.makeText(getBaseContext(), "Bratan, tut oshibka", Toast.LENGTH_SHORT).show();
             }
             else {
                 numbers = new int[count];
