@@ -100,7 +100,7 @@
             android:layout_height="wrap_content"
             app:cardCornerRadius="20dp"
             app:cardBackgroundColor="#4d882f"
-            android:layout_above="@+id/view2"
+            android:layout_above="@+id/statTwo"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_marginLeft="4dp"
@@ -133,7 +133,7 @@
             android:layout_marginLeft="4dp"
             android:layout_marginBottom="5dp"
             android:layout_alignWithParentIfMissing="false"
-            android:id="@+id/view2"
+            android:id="@+id/statTwo"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
@@ -156,6 +156,12 @@
     </RelativeLayout>
     </LinearLayout>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
+        android:id="@+id/last">
     <ImageView
         android:layout_width="230dp"
         android:layout_height="wrap_content"
@@ -182,8 +188,9 @@
         app:backgroundTint="#fff"
         app:srcCompat="@drawable/versus"
         app:rippleColor="#6b1515"
+        android:id="@+id/fab"
         android:layout_centerHorizontal="true"
-        android:layout_centerInParent="true"
-        android:id="@+id/fab" />
+        android:layout_centerInParent="true"/>
+    </RelativeLayout>
 
 </RelativeLayout>
