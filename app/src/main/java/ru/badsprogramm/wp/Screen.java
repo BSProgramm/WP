@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,8 +42,9 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
     List<Card> cards = new ArrayList<>();
     ImageLoader imageLoader;
     DisplayImageOptions options;
-    TextView tv,stats,tv2,stats2, score;
-    RelativeLayout min, max;
+    TextView tv,stats,tv2,stats2, score, nowScore, maxScore;
+    RelativeLayout min, max, screenGame;
+    LinearLayout screenScore;
     ImageView img,img2;
     Animation animation;
     int[] numbers;
@@ -65,6 +67,10 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
         img = (ImageView) findViewById(R.id.img);
         img2 = (ImageView) findViewById(R.id.img2);
         score = (TextView) findViewById(R.id.score);
+        screenGame = (RelativeLayout) findViewById(R.id.screenGame);
+        screenScore = (LinearLayout) findViewById(R.id.screenScore);
+        nowScore = (TextView) findViewById(R.id.nowScore);
+        maxScore = (TextView) findViewById(R.id.maxScore);
         animation = AnimationUtils.loadAnimation(this, R.anim.bounce_scrore);
 
         min.setOnClickListener(this);
@@ -87,18 +93,24 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
                         i++;
                         score.setText(String.valueOf(i));
                         score.startAnimation(animation);
-                        max.setEnabled(true);
                     }
-                    else min.setEnabled(false);
+                    else {
+                        screenGame.setVisibility(View.GONE);
+                        nowScore.setText(score.getText());
+                        screenScore.setVisibility(View.VISIBLE);
+                    }
                     break;
                 case R.id.max:
                     if(Integer.parseInt(cards.get(numbers[i]).getStats().replaceAll(" ", "")) < Integer.parseInt(cards.get(numbers[i+1]).getStats().replaceAll(" ",""))){
                         i++;
                         score.setText(String.valueOf(i));
                         score.startAnimation(animation);
-                        min.setEnabled(true);
                     }
-                    else max.setEnabled(false);
+                    else {
+                        screenGame.setVisibility(View.GONE);
+                        nowScore.setText(score.getText());
+                        screenScore.setVisibility(View.VISIBLE);
+                    }
                     break;
             }
         }

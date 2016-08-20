@@ -3,4 +3,6 @@
     <string name="play">ИГРАТЬ</string>
     <string name="exit">ВЫХОД</string>
     <string name="back">НАЗАД</string>
+    <string name="your_score">ВАШ СЧЕТ</string>
+    <string name="max_score">ВАШ РЕКОРД</string>
 </resources>
