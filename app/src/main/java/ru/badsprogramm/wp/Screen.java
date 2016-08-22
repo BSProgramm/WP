@@ -2,9 +2,16 @@ package ru.badsprogramm.wp;
 
 
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -12,7 +19,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiskCache;
 import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
@@ -31,6 +37,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +51,7 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
     DisplayImageOptions options;
     TextView tv,stats,tv2,stats2, score, nowScore, maxScore;
     RelativeLayout min, max, screenGame;
-    LinearLayout screenScore;
+    LinearLayout screenScore, shareView;
     ImageView img,img2;
     Animation animation;
     int[] numbers;
@@ -52,6 +59,7 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
     int parse = 0;
     LoadSub load;
     ProgressDialog status;
+    FloatingActionButton share;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,11 +78,13 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
         screenGame = (RelativeLayout) findViewById(R.id.screenGame);
         screenScore = (LinearLayout) findViewById(R.id.screenScore);
         nowScore = (TextView) findViewById(R.id.nowScore);
-        maxScore = (TextView) findViewById(R.id.maxScore);
+        share = (FloatingActionButton) findViewById(R.id.share);
+        shareView = (LinearLayout) findViewById(R.id.shareView);
         animation = AnimationUtils.loadAnimation(this, R.anim.bounce_scrore);
 
         min.setOnClickListener(this);
         max.setOnClickListener(this);
+        share.setOnClickListener(this);
 
         UIL();
         load = new LoadSub();
@@ -112,6 +122,19 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
                         screenScore.setVisibility(View.VISIBLE);
                     }
                     break;
+                case R.id.share:
+                    Bitmap bm = screenShot(shareView.getRootView());
+                    File file = saveBitmap(bm, "bsprgrmm.png");
+                    Log.i("chase", "filepath: "+file.getAbsolutePath());
+                    Uri uri = Uri.fromFile(new File(file.getAbsolutePath()));
+                    Intent shareIntent = new Intent();
+                    shareIntent.setAction(Intent.ACTION_SEND);
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, "Мой рекорд" + score.getText() + "в игре -Кто популярнее?- ");
+                    shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                    shareIntent.setType("image/*");
+                    shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(Intent.createChooser(shareIntent, "share"));
+                    break;
             }
         }
         catch (NumberFormatException nfe){
@@ -127,6 +150,30 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
 
         if (i < numbers.length - 1) setCards(i);
         else super.onBackPressed();
+    }
+
+    private Bitmap screenShot(View view) {
+        Bitmap bitmap = Bitmap.createBitmap(view.getWidth(),view.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+        return bitmap;
+    }
+
+    private static File saveBitmap(Bitmap bm, String fileName){
+        final String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Screenshots";
+        File dir = new File(path);
+        if(!dir.exists())
+            dir.mkdirs();
+        File file = new File(dir, fileName);
+        try {
+            FileOutputStream fOut = new FileOutputStream(file);
+            bm.compress(Bitmap.CompressFormat.PNG, 90, fOut);
+            fOut.flush();
+            fOut.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return file;
     }
 
     public class Connect extends AsyncTask<String, Void, String> {
