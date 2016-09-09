@@ -19,17 +19,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiskCache;
-import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
-import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
-import com.nostra13.universalimageloader.core.decode.BaseImageDecoder;
-import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
-import com.nostra13.universalimageloader.utils.StorageUtils;
+import com.squareup.picasso.Picasso;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -43,23 +35,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Screen extends AppCompatActivity implements View.OnClickListener{
+public class Screen extends AppCompatActivity implements View.OnClickListener {
 
     Elements obj;
     List<Card> cards = new ArrayList<>();
-    ImageLoader imageLoader;
-    DisplayImageOptions options;
-    TextView tv,stats,tv2,stats2, score, nowScore, maxScore;
+    TextView tv, stats, tv2, stats2, score, nowScore;
     RelativeLayout min, max, screenGame;
     LinearLayout screenScore, shareView;
-    ImageView img,img2;
+    ImageView img, img2;
     Animation animation;
     int[] numbers;
     int i = 0;
     int parse = 0;
     LoadSub load;
     ProgressDialog status;
-    FloatingActionButton share;
+    FloatingActionButton share, re;
+    int count = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,30 +71,36 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
         screenScore = (LinearLayout) findViewById(R.id.screenScore);
         nowScore = (TextView) findViewById(R.id.nowScore);
         share = (FloatingActionButton) findViewById(R.id.share);
+        re = (FloatingActionButton) findViewById(R.id.re);
         shareView = (LinearLayout) findViewById(R.id.shareView);
         animation = AnimationUtils.loadAnimation(this, R.anim.bounce_scrore);
 
         min.setOnClickListener(this);
         max.setOnClickListener(this);
         share.setOnClickListener(this);
+        re.setOnClickListener(this);
 
-        UIL();
-        load = new LoadSub();
         status = new ProgressDialog(Screen.this);
         status.setMessage("Загрузка...");
         status.setCancelable(false);
         new Connect().execute();
+        load = new LoadSub();
     }
 
     @Override
     public void onClick(View v) {
-        try{
-            switch (v.getId()){
+        try {
+            switch (v.getId()) {
                 case R.id.min:
-                    if(Integer.parseInt(cards.get(numbers[i]).getStats().replaceAll(" ", "")) > Integer.parseInt(cards.get(numbers[i+1]).getStats().replaceAll(" ",""))){
+                    if (i<count)
+                    if (Integer.parseInt(cards.get(numbers[i]).getStats().replaceAll(" ", "")) > Integer.parseInt(cards.get(numbers[i + 1]).getStats().replaceAll(" ", ""))) {
                         i++;
                         score.setText(String.valueOf(i));
                         score.startAnimation(animation);
+                    } else {
+                        screenGame.setVisibility(View.GONE);
+                        nowScore.setText(score.getText());
+                        screenScore.setVisibility(View.VISIBLE);
                     }
                     else {
                         screenGame.setVisibility(View.GONE);
@@ -111,12 +109,16 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
                     }
                     break;
                 case R.id.max:
-                    if(Integer.parseInt(cards.get(numbers[i]).getStats().replaceAll(" ", "")) < Integer.parseInt(cards.get(numbers[i+1]).getStats().replaceAll(" ",""))){
+                    if (i<count)
+                    if (Integer.parseInt(cards.get(numbers[i]).getStats().replaceAll(" ", "")) < Integer.parseInt(cards.get(numbers[i + 1]).getStats().replaceAll(" ", ""))) {
                         i++;
                         score.setText(String.valueOf(i));
                         score.startAnimation(animation);
-                    }
-                    else {
+                    } else {
+                        screenGame.setVisibility(View.GONE);
+                        nowScore.setText(score.getText());
+                        screenScore.setVisibility(View.VISIBLE);
+                    }else {
                         screenGame.setVisibility(View.GONE);
                         nowScore.setText(score.getText());
                         screenScore.setVisibility(View.VISIBLE);
@@ -125,7 +127,7 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
                 case R.id.share:
                     Bitmap bm = screenShot(shareView.getRootView());
                     File file = saveBitmap(bm, "bsprgrmm.png");
-                    Log.i("chase", "filepath: "+file.getAbsolutePath());
+                    Log.i("chase", "filepath: " + file.getAbsolutePath());
                     Uri uri = Uri.fromFile(new File(file.getAbsolutePath()));
                     Intent shareIntent = new Intent();
                     shareIntent.setAction(Intent.ACTION_SEND);
@@ -135,11 +137,20 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
                     shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     startActivity(Intent.createChooser(shareIntent, "share"));
                     break;
+                case R.id.re:
+                    i = 0;
+                    parse = 0;
+                    count = 0;
+                    numbers = new int[0];
+                    status = new ProgressDialog(Screen.this);
+                    status.setMessage("Загрузка...");
+                    status.setCancelable(false);
+                    new Connect().execute();
+                    new LoadSub().doInBackground();
+                    break;
             }
-        }
-        catch (NumberFormatException nfe){
-            //Toast.makeText(getBaseContext(), "Integer ne sparsilsya", Toast.LENGTH_SHORT).show();
-            status.show();
+        } catch (NumberFormatException nfe) {
+            Toast.makeText(getBaseContext(), "Integer ne sparsilsya", Toast.LENGTH_SHORT).show();
         }
 
         if (load.getStatus() != AsyncTask.Status.RUNNING){
@@ -149,20 +160,20 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
         }
 
         if (i < numbers.length - 1) setCards(i);
-        else super.onBackPressed();
     }
 
+    //Создание скриншота
     private Bitmap screenShot(View view) {
-        Bitmap bitmap = Bitmap.createBitmap(view.getWidth(),view.getHeight(), Bitmap.Config.ARGB_8888);
+        Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         view.draw(canvas);
         return bitmap;
     }
-
-    private static File saveBitmap(Bitmap bm, String fileName){
+    //Сохранение БитКарты (Нужно для СкринШота)
+    private static File saveBitmap(Bitmap bm, String fileName) {
         final String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Screenshots";
         File dir = new File(path);
-        if(!dir.exists())
+        if (!dir.exists())
             dir.mkdirs();
         File file = new File(dir, fileName);
         try {
@@ -176,21 +187,28 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
         return file;
     }
 
-    public class Connect extends AsyncTask<String, Void, String> {
 
+    public class Connect extends AsyncTask<String, Void, String> {
         ProgressDialog dialog = new ProgressDialog(Screen.this);
         private boolean exception = false;
         boolean b;
-        int count = 0;
 
         @Override
         protected void onPreExecute() {
-            if(!b){dialog.setMessage("Загрузка...");dialog.show();dialog.setCancelable(false);}
-            b=true;
+            if (!b) {
+                dialog.setMessage("Загрузка...");
+                dialog.show();
+                dialog.setCancelable(false);
+            }
+            b = true;
         }
 
         protected String doInBackground(String... arg) {
             Document doc;
+
+
+
+            cards.clear();
 
             try {
                 doc = Jsoup.connect("http://kumdang.ru/wp.html")
@@ -198,16 +216,16 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
 
                 obj = doc.select("div#object");
 
-                for(Element now : obj){
+                for (Element now : obj) {
                     cards.add(new Card(obj.get(count).text().split(" ")[0], obj.get(count).text().split(" ")[1], now.text().split(" ")[2]));
                     count++;
                 }
 
-                //Random
+                //random
                 numbers = new int[count];
-                for (int i = 0; i < count; i++){
+                for (int i = 0; i < count; i++) {
                     int k = new Random().nextInt(count);
-                    while (numbers[k] != 0){
+                    while (numbers[k] != 0) {
                         k = new Random().nextInt(count);
                     }
                     numbers[k] = i;
@@ -233,10 +251,11 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
 
         @Override
         protected void onPostExecute(String result) {
-            if (exception){
-                //Toast.makeText(getBaseContext(), "Bratan, tut oshibka", Toast.LENGTH_SHORT).show();
-            }
-            else {
+            if (exception) {
+            } else {
+                screenGame.setVisibility(View.VISIBLE);
+                score.setText("0");
+                screenScore.setVisibility(View.GONE);
                 setCards(0);
             }
             dialog.dismiss();
@@ -244,91 +263,42 @@ public class Screen extends AppCompatActivity implements View.OnClickListener{
 
     }
 
-    public class LoadSub extends AsyncTask<String, Void, String>{
+
+    public class LoadSub extends AsyncTask<String, Void, String> {
 
         boolean exception = false;
         boolean ie = false;
-
-        @Override
-        protected void onPreExecute() {
-            if (i >= parse - 2) status.show();
-        }
 
         protected String doInBackground(String... arg) {
             Document doc;
 
             try {
-                for (int i = parse; i < parse + 4; i++){
-                    if (cards.get(numbers[i]).getStats().contains("youtube")){
+                for (int i = parse; i < count; i++) {
+                    if (cards.get(numbers[i]).getStats().contains("youtube")) {
                         doc = Jsoup.connect(cards.get(numbers[i]).getStats())
                                 .userAgent("Chrome/32.0.1667.0")
                                 .get();
                         cards.get(numbers[i]).setStats(doc.select("div.primary-header-actions>span>span").get(0).text());
                     }
                 }
-                parse = parse + 4;
-            }
-            catch (IndexOutOfBoundsException i){
+            } catch (IndexOutOfBoundsException i) {
                 ie = true;
-            }
-            catch (Exception e){
+            } catch (Exception e) {
                 exception = true;
             }
             return null;
         }
 
-        @Override
-        protected void onPostExecute(String s) {
-            status.dismiss();
-            if (exception){
-                //Toast.makeText(getBaseContext(), "Ne zagruzil", Toast.LENGTH_SHORT).show();
-            }
-            else {
-                if (ie){
-                    //Toast.makeText(getBaseContext(), "Vse Zagruzil", Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    //Toast.makeText(getBaseContext(), "Zagruzil", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
     }
 
-    private void setCards(int i){
+    private void setCards(int i) {
         tv.setText(cards.get(numbers[i]).getName());
-        imageLoader.displayImage(cards.get(numbers[i]).getImg(), img, options);
+        Picasso.with(this).load(cards.get(numbers[i]).getImg()).into(img);
         stats.setText(cards.get(numbers[i]).getStats());
 
-        tv2.setText(cards.get(numbers[i+1]).getName());
-        imageLoader.displayImage(cards.get(numbers[i+1]).getImg(), img2, options);
-        //stats2.setText(cards.get(numbers[i+1]).getStats());
+        tv2.setText(cards.get(numbers[i + 1]).getName());
+        Picasso.with(this).load(cards.get(numbers[i + 1]).getImg()).into(img2);
     }
 
-    private void UIL(){
-        options = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.mipmap.ic_launcher)
-                .cacheOnDisk(true)
-                .cacheInMemory(true)
-                .build();
-        imageLoader = ImageLoader.getInstance();
-        File Dir = StorageUtils.getCacheDirectory(this);
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this)
-                .threadPriority(Thread.NORM_PRIORITY - 2) // default
-                .tasksProcessingOrder(QueueProcessingType.FIFO) // default
-                .denyCacheImageMultipleSizesInMemory()
-                .memoryCache(new LruMemoryCache(2 * 1024 * 1024))
-                .memoryCacheSize(2 * 1024 * 1024)
-                .memoryCacheSizePercentage(13) // default
-                .diskCache(new UnlimitedDiskCache(Dir)) // default
-                .diskCacheSize(50 * 1024 * 1024)
-                .diskCacheFileCount(100)
-                .diskCacheFileNameGenerator(new HashCodeFileNameGenerator()) // default
-                .imageDownloader(new BaseImageDownloader(this)) // default
-                .imageDecoder(new BaseImageDecoder(true)) // default
-                .defaultDisplayImageOptions(DisplayImageOptions.createSimple()) // default
-                .writeDebugLogs()
-                .build();
 
-        imageLoader.init(config);
-    }
 }
