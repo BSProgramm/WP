@@ -231,7 +231,7 @@ public class Screen extends AppCompatActivity implements View.OnClickListener {
                     numbers[k] = i;
                 }
 
-                for (int i = parse; i < parse + 6; i++){
+                for (int i = parse; i < parse + 4; i++){
                     if (cards.get(numbers[i]).getStats().contains("youtube")){
                         doc = Jsoup.connect(cards.get(numbers[i]).getStats())
                                 .userAgent("Chrome/32.0.1667.0")
@@ -240,7 +240,7 @@ public class Screen extends AppCompatActivity implements View.OnClickListener {
                     }
                 }
 
-                parse = 6;
+                parse = 4;
 
             } catch (IOException e) {
                 exception = true;
